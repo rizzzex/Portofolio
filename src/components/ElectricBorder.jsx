@@ -16,14 +16,24 @@ function hexToRgba(hex, alpha = 1) {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
+/**
+ * @param {object} props
+ * @param {React.ReactNode} props.children
+ * @param {string} [props.color]
+ * @param {number} [props.speed]
+ * @param {number} [props.chaos]
+ * @param {number} [props.borderRadius]
+ * @param {string} [props.className]
+ * @param {React.CSSProperties} [props.style]
+ */
 const ElectricBorder = ({
   children,
   color = '#5227FF',
   speed = 1,
   chaos = 0.12,
   borderRadius = 24,
-  className,
-  style
+  className = '',
+  style = {}
 }) => {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);

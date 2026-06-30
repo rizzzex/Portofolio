@@ -28,8 +28,23 @@ function useElementWidth(ref) {
   return width;
 }
 
+/**
+ * @param {object} props
+ * @param {any} [props.scrollContainerRef]
+ * @param {string[]} [props.texts]
+ * @param {number} [props.velocity]
+ * @param {string} [props.className]
+ * @param {number} [props.damping]
+ * @param {number} [props.stiffness]
+ * @param {number} [props.numCopies]
+ * @param {any} [props.velocityMapping]
+ * @param {string} [props.parallaxClassName]
+ * @param {string} [props.scrollerClassName]
+ * @param {any} [props.parallaxStyle]
+ * @param {any} [props.scrollerStyle]
+ */
 export const ScrollVelocity = ({
-  scrollContainerRef,
+  scrollContainerRef = null,
   texts = [],
   velocity = 100,
   className = '',
