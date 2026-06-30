@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, Suspense } from 'react';
 import { Canvas, extend, useFrame } from '@react-three/fiber';
-import { useGLTF, useTexture, Environment, Lightformer } from '@react-three/drei';
+import { useGLTF, useTexture, Environment, Lightformer, useProgress } from '@react-three/drei';
 import { BallCollider, CuboidCollider, Physics, RigidBody, useRopeJoint, useSphericalJoint } from '@react-three/rapier';
 import { MeshLineGeometry, MeshLineMaterial } from 'meshline';
 import * as THREE from 'three';
@@ -14,6 +14,36 @@ const BLANK_PIXEL =
 
 const FRONT_UV_RECT = { x: 0, y: 0, w: 0.5, h: 0.755 };
 const BACK_UV_RECT = { x: 0.5, y: 0, w: 0.5, h: 0.757 };
+
+function LanyardLoader() {
+  const { progress } = useProgress();
+  return (
+    <div className="absolute inset-0 flex flex-col justify-center items-center bg-transparent z-20 pointer-events-none">
+      <div className="flex flex-col items-center space-y-4">
+        {/* Glowing Spinner */}
+        <div className="w-10 h-10 border-4 border-cyan-400/20 border-t-cyan-400 rounded-full animate-spin shadow-[0_0_15px_rgba(34,211,238,0.3)]" />
+        
+        {/* Loading Text */}
+        <div className="text-cyan-400 font-medium tracking-wider text-xs animate-pulse">
+          INITIALIZING LANYARD 3D...
+        </div>
+        
+        {/* Progress Bar Container */}
+        <div className="w-40 h-1 bg-gray-800 rounded-full overflow-hidden border border-gray-700/30">
+          <div 
+            className="h-full bg-gradient-to-r from-cyan-400 to-blue-500 transition-all duration-300 ease-out shadow-[0_0_8px_rgba(6,182,212,0.5)]"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+        
+        {/* Percentage */}
+        <div className="text-[10px] text-gray-500 font-mono">
+          {Math.round(progress)}%
+        </div>
+      </div>
+    </div>
+  );
+}
 
 /**
  * @param {object} props
@@ -44,52 +74,54 @@ export default function Lanyard({
 
   return (
     <div className="relative z-10 w-full h-full min-h-[500px] flex justify-center items-center">
-      <Canvas
-        camera={{ position: position, fov: fov }}
-        dpr={[1, isMobile ? 1.5 : 2]}
-        gl={{ alpha: transparent }}
-        onCreated={({ gl }) => gl.setClearColor(new THREE.Color(0x000000), transparent ? 0 : 1)}
-      >
-        <ambientLight intensity={Math.PI} />
-        <Physics gravity={gravity} timeStep={isMobile ? 1 / 30 : 1 / 60}>
-          <Band
-            isMobile={isMobile}
-            combinedImage={combinedImage}
-            imageFit={imageFit}
-            lanyardWidth={lanyardWidth}
-          />
-        </Physics>
-        <Environment blur={0.75}>
-          <Lightformer
-            intensity={2}
-            color="white"
-            position={[0, -1, 5]}
-            rotation={[0, 0, Math.PI / 3]}
-            scale={[100, 0.1, 1]}
-          />
-          <Lightformer
-            intensity={3}
-            color="white"
-            position={[-1, -1, 1]}
-            rotation={[0, 0, Math.PI / 3]}
-            scale={[100, 0.1, 1]}
-          />
-          <Lightformer
-            intensity={3}
-            color="white"
-            position={[1, 1, 1]}
-            rotation={[0, 0, Math.PI / 3]}
-            scale={[100, 0.1, 1]}
-          />
-          <Lightformer
-            intensity={10}
-            color="white"
-            position={[-10, 0, 14]}
-            rotation={[0, Math.PI / 2, Math.PI / 3]}
-            scale={[100, 10, 1]}
-          />
-        </Environment>
-      </Canvas>
+      <Suspense fallback={<LanyardLoader />}>
+        <Canvas
+          camera={{ position: position, fov: fov }}
+          dpr={[1, isMobile ? 1.2 : 1.5]}
+          gl={{ alpha: transparent }}
+          onCreated={({ gl }) => gl.setClearColor(new THREE.Color(0x000000), transparent ? 0 : 1)}
+        >
+          <ambientLight intensity={Math.PI} />
+          <Physics gravity={gravity} timeStep={isMobile ? 1 / 30 : 1 / 60}>
+            <Band
+              isMobile={isMobile}
+              combinedImage={combinedImage}
+              imageFit={imageFit}
+              lanyardWidth={lanyardWidth}
+            />
+          </Physics>
+          <Environment blur={0.75}>
+            <Lightformer
+              intensity={2}
+              color="white"
+              position={[0, -1, 5]}
+              rotation={[0, 0, Math.PI / 3]}
+              scale={[100, 0.1, 1]}
+            />
+            <Lightformer
+              intensity={3}
+              color="white"
+              position={[-1, -1, 1]}
+              rotation={[0, 0, Math.PI / 3]}
+              scale={[100, 0.1, 1]}
+            />
+            <Lightformer
+              intensity={3}
+              color="white"
+              position={[1, 1, 1]}
+              rotation={[0, 0, Math.PI / 3]}
+              scale={[100, 0.1, 1]}
+            />
+            <Lightformer
+              intensity={10}
+              color="white"
+              position={[-10, 0, 14]}
+              rotation={[0, Math.PI / 2, Math.PI / 3]}
+              scale={[100, 10, 1]}
+            />
+          </Environment>
+        </Canvas>
+      </Suspense>
     </div>
   );
 }
@@ -169,7 +201,7 @@ function Band({
     const composite = new THREE.CanvasTexture(canvas);
     composite.colorSpace = THREE.SRGBColorSpace;
     composite.flipY = baseMap.flipY;
-    composite.anisotropy = 16;
+    composite.anisotropy = 8;
     composite.needsUpdate = true;
     return composite;
   }, [combinedImage, imageFit, combinedTex, materials.base.map]);
@@ -258,8 +290,8 @@ function Band({
             <mesh geometry={nodes.card.geometry}>
               <meshPhysicalMaterial
                 map={cardMap}
-                map-anisotropy={16}
-                clearcoat={isMobile ? 0 : 1}
+                map-anisotropy={8}
+                clearcoat={isMobile ? 0 : 0.3}
                 clearcoatRoughness={0.15}
                 roughness={0.9}
                 metalness={0.8}
