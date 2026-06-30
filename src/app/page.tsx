@@ -6,10 +6,13 @@ import AboutSection from "@/components/AboutSection";
 import TechStackSection from "@/components/TechStackSection";
 import ProjectsSection from "@/components/ProjectsSection";
 import ContactSection from "@/components/ContactSection";
+import GlobalPreloader from "@/components/GlobalPreloader";
 
 export default function Home() {
   return (
     <main className="relative min-h-screen bg-black flex flex-col">
+      {/* Global preloader screen */}
+      <GlobalPreloader />
       {/* Background Ferrofluid (Fixed agar tetap ada saat scroll) */}
       <div className="fixed inset-0 z-0 pointer-events-auto">
         <Ferrofluid
